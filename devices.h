@@ -19,6 +19,8 @@
  * ======================================================================================
  */
 
+#include "Arduino-IRremote.h"       // Need defines from the main library file
+
 //=======================================================================================
 // Device Specific Defines
 //=======================================================================================
@@ -84,57 +86,57 @@
 
 #endif
 
-//------------------------------------------------------------------------------
-// Defines for Timer
+//=======================================================================================
+// Defines for Timer Specification
+//=======================================================================================
 
-//---------------------------------------------------------
+
 // Timer2 (8 bits)
-//
 #if defined(IR_USE_TIMER2)
 
-#define TIMER_RESET
-#define TIMER_ENABLE_PWM    (TCCR2A |= _BV(COM2B1))
-#define TIMER_DISABLE_PWM   (TCCR2A &= ~(_BV(COM2B1)))
-#define TIMER_ENABLE_INTR   (TIMSK2 = _BV(OCIE2A))
-#define TIMER_DISABLE_INTR  (TIMSK2 = 0)
-#define TIMER_INTR_NAME     TIMER2_COMPA_vect
+#define IR_TIMER_RESET
+#define IR_TIMER_ENABLE_PWM    (TCCR2A |= _BV(COM2B1))
+#define IR_TIMER_DISABLE_PWM   (TCCR2A &= ~(_BV(COM2B1)))
+#define IR_TIMER_ENABLE_INTR   (TIMSK2 = _BV(OCIE2A))
+#define IR_TIMER_DISABLE_INTR  (TIMSK2 = 0)
+#define IR_TIMER_INTR_NAME     TIMER2_COMPA_vect
 
-#define TIMER_CONFIG_KHZ(val) ({ \
-	const uint8_t pwmval = SYSCLOCK / 2000 / (val); \
+#define IR_TIMER_CONFIG_KHZ(val) ({ \
+	const uint8_t pwmval = IR_SYSCLOCK / 2000 / (val); \
 	TCCR2A               = _BV(WGM20); \
 	TCCR2B               = _BV(WGM22) | _BV(CS20); \
 	OCR2A                = pwmval; \
 	OCR2B                = pwmval / 3; \
 })
 
-#define TIMER_COUNT_TOP  (SYSCLOCK * USECPERTICK / 1000000)
+#define IR_TIMER_COUNT_TOP  (IR_SYSCLOCK * IR_USECPERTICK / 1000000)
 
 //-----------------
-#if (TIMER_COUNT_TOP < 256)
-#	define TIMER_CONFIG_NORMAL() ({ \
+#if (IR_TIMER_COUNT_TOP < 256)
+#	define IR_TIMER_CONFIG_NORMAL() ({ \
 		TCCR2A = _BV(WGM21); \
 		TCCR2B = _BV(CS20); \
-		OCR2A  = TIMER_COUNT_TOP; \
+		OCR2A  = IR_TIMER_COUNT_TOP; \
 		TCNT2  = 0; \
 	})
 #else
-#	define TIMER_CONFIG_NORMAL() ({ \
+#	define IR_TIMER_CONFIG_NORMAL() ({ \
 		TCCR2A = _BV(WGM21); \
 		TCCR2B = _BV(CS21); \
-		OCR2A  = TIMER_COUNT_TOP / 8; \
+		OCR2A  = IR_TIMER_COUNT_TOP / 8; \
 		TCNT2  = 0; \
 	})
 #endif
 
 //-----------------
 #if defined(CORE_OC2B_PIN)
-#	define TIMER_PWM_PIN  CORE_OC2B_PIN  // Teensy
+    #define IR_TIMER_PWM_PIN  CORE_OC2B_PIN  // Teensy
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#	define TIMER_PWM_PIN  9              // Arduino Mega
+    #define IR_TIMER_PWM_PIN  9              // Arduino Mega
 #elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
-#	define TIMER_PWM_PIN  14             // Sanguino
+    #define IR_TIMER_PWM_PIN  14             // Sanguino
 #else
-#	define TIMER_PWM_PIN  3              // Arduino Duemilanove, Diecimila, LilyPad, etc
+    #define IR_TIMER_PWM_PIN  3              // Arduino Duemilanove, Diecimila, LilyPad, etc
 #endif
 
 //---------------------------------------------------------
@@ -142,48 +144,48 @@
 //
 #elif defined(IR_USE_TIMER1)
 
-#define TIMER_RESET
-#define TIMER_ENABLE_PWM   (TCCR1A |= _BV(COM1A1))
-#define TIMER_DISABLE_PWM  (TCCR1A &= ~(_BV(COM1A1)))
+#define IR_TIMER_RESET
+#define IR_TIMER_ENABLE_PWM   (TCCR1A |= _BV(COM1A1))
+#define IR_TIMER_DISABLE_PWM  (TCCR1A &= ~(_BV(COM1A1)))
 
 //-----------------
 #if defined(__AVR_ATmega8P__) || defined(__AVR_ATmega8__)
-#	define TIMER_ENABLE_INTR   (TIMSK |= _BV(OCIE1A))
-#	define TIMER_DISABLE_INTR  (TIMSK &= ~_BV(OCIE1A))
+    #define IR_TIMER_ENABLE_INTR   (TIMSK |= _BV(OCIE1A))
+    #define IR_TIMER_DISABLE_INTR  (TIMSK &= ~_BV(OCIE1A))
 #else
-#	define TIMER_ENABLE_INTR   (TIMSK1 = _BV(OCIE1A))
-#	define TIMER_DISABLE_INTR  (TIMSK1 = 0)
+    #define IR_TIMER_ENABLE_INTR   (TIMSK1 = _BV(OCIE1A))
+    #define IR_TIMER_DISABLE_INTR  (TIMSK1 = 0)
 #endif
 
 //-----------------
-#define TIMER_INTR_NAME       TIMER1_COMPA_vect
+#define IR_TIMER_INTR_NAME       TIMER1_COMPA_vect
 
-#define TIMER_CONFIG_KHZ(val) ({ \
-	const uint16_t pwmval = SYSCLOCK / 2000 / (val); \
+#define IR_TIMER_CONFIG_KHZ(val) ({ \
+	const uint16_t pwmval = IR_SYSCLOCK / 2000 / (val); \
 	TCCR1A                = _BV(WGM11); \
 	TCCR1B                = _BV(WGM13) | _BV(CS10); \
 	ICR1                  = pwmval; \
 	OCR1A                 = pwmval / 3; \
 })
 
-#define TIMER_CONFIG_NORMAL() ({ \
+#define IR_TIMER_CONFIG_NORMAL() ({ \
 	TCCR1A = 0; \
 	TCCR1B = _BV(WGM12) | _BV(CS10); \
-	OCR1A  = SYSCLOCK * USECPERTICK / 1000000; \
+	OCR1A  = IR_SYSCLOCK * IR_USECPERTICK / 1000000; \
 	TCNT1  = 0; \
 })
 
 //-----------------
 #if defined(CORE_OC1A_PIN)
-#	define TIMER_PWM_PIN  CORE_OC1A_PIN  // Teensy
+    #define IR_TIMER_PWM_PIN  CORE_OC1A_PIN  // Teensy
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#	define TIMER_PWM_PIN  11             // Arduino Mega
+    #define IR_TIMER_PWM_PIN  11             // Arduino Mega
 #elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
-#	define TIMER_PWM_PIN  13             // Sanguino
+    #define IR_TIMER_PWM_PIN  13             // Sanguino
 #elif defined(__AVR_ATtiny84__)
-# define TIMER_PWM_PIN  6
+    #define IR_TIMER_PWM_PIN  6
 #else
-#	define TIMER_PWM_PIN  9              // Arduino Duemilanove, Diecimila, LilyPad, etc
+    #define IR_TIMER_PWM_PIN  9              // Arduino Duemilanove, Diecimila, LilyPad, etc
 #endif
 
 //---------------------------------------------------------
@@ -191,33 +193,33 @@
 //
 #elif defined(IR_USE_TIMER3)
 
-#define TIMER_RESET
-#define TIMER_ENABLE_PWM     (TCCR3A |= _BV(COM3A1))
-#define TIMER_DISABLE_PWM    (TCCR3A &= ~(_BV(COM3A1)))
-#define TIMER_ENABLE_INTR    (TIMSK3 = _BV(OCIE3A))
-#define TIMER_DISABLE_INTR   (TIMSK3 = 0)
-#define TIMER_INTR_NAME      TIMER3_COMPA_vect
+#define IR_TIMER_RESET
+#define IR_TIMER_ENABLE_PWM     (TCCR3A |= _BV(COM3A1))
+#define IR_TIMER_DISABLE_PWM    (TCCR3A &= ~(_BV(COM3A1)))
+#define IR_TIMER_ENABLE_INTR    (TIMSK3 = _BV(OCIE3A))
+#define IR_TIMER_DISABLE_INTR   (TIMSK3 = 0)
+#define IR_TIMER_INTR_NAME      TIMER3_COMPA_vect
 
-#define TIMER_CONFIG_KHZ(val) ({ \
-  const uint16_t pwmval = SYSCLOCK / 2000 / (val); \
+#define IR_TIMER_CONFIG_KHZ(val) ({ \
+  const uint16_t pwmval = IR_SYSCLOCK / 2000 / (val); \
   TCCR3A = _BV(WGM31); \
   TCCR3B = _BV(WGM33) | _BV(CS30); \
-  ICR3 = pwmval; \
-  OCR3A = pwmval / 3; \
+  ICR3   = pwmval; \
+  OCR3A  = pwmval / 3; \
 })
 
-#define TIMER_CONFIG_NORMAL() ({ \
+#define IR_TIMER_CONFIG_NORMAL() ({ \
   TCCR3A = 0; \
   TCCR3B = _BV(WGM32) | _BV(CS30); \
-  OCR3A = SYSCLOCK * USECPERTICK / 1000000; \
+  OCR3A = IR_SYSCLOCK * IR_USECPERTICK / 1000000; \
   TCNT3 = 0; \
 })
 
 //-----------------
 #if defined(CORE_OC3A_PIN)
-#	define TIMER_PWM_PIN  CORE_OC3A_PIN  // Teensy
+#	define IR_TIMER_PWM_PIN  CORE_OC3A_PIN  // Teensy
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#	define TIMER_PWM_PIN  5              // Arduino Mega
+#	define IR_TIMER_PWM_PIN  5              // Arduino Mega
 #else
 #	error "Please add OC3A pin number here\n"
 #endif
@@ -227,15 +229,15 @@
 //
 #elif defined(IR_USE_TIMER4_HS)
 
-#define TIMER_RESET
-#define TIMER_ENABLE_PWM    (TCCR4A |= _BV(COM4A1))
-#define TIMER_DISABLE_PWM   (TCCR4A &= ~(_BV(COM4A1)))
-#define TIMER_ENABLE_INTR   (TIMSK4 = _BV(TOIE4))
-#define TIMER_DISABLE_INTR  (TIMSK4 = 0)
-#define TIMER_INTR_NAME     TIMER4_OVF_vect
+#define IR_TIMER_RESET
+#define IR_TIMER_ENABLE_PWM    (TCCR4A |= _BV(COM4A1))
+#define IR_TIMER_DISABLE_PWM   (TCCR4A &= ~(_BV(COM4A1)))
+#define IR_TIMER_ENABLE_INTR   (TIMSK4 = _BV(TOIE4))
+#define IR_TIMER_DISABLE_INTR  (TIMSK4 = 0)
+#define IR_TIMER_INTR_NAME     TIMER4_OVF_vect
 
-#define TIMER_CONFIG_KHZ(val) ({ \
-	const uint16_t pwmval = SYSCLOCK / 2000 / (val); \
+#define IR_TIMER_CONFIG_KHZ(val) ({ \
+	const uint16_t pwmval = IR_SYSCLOCK / 2000 / (val); \
 	TCCR4A                = (1<<PWM4A); \
 	TCCR4B                = _BV(CS40); \
 	TCCR4C                = 0; \
@@ -247,23 +249,23 @@
 	OCR4A                 = (pwmval / 3) & 255; \
 })
 
-#define TIMER_CONFIG_NORMAL() ({ \
+#define IR_TIMER_CONFIG_NORMAL() ({ \
 	TCCR4A = 0; \
 	TCCR4B = _BV(CS40); \
 	TCCR4C = 0; \
 	TCCR4D = 0; \
 	TCCR4E = 0; \
-	TC4H   = (SYSCLOCK * USECPERTICK / 1000000) >> 8; \
-	OCR4C  = (SYSCLOCK * USECPERTICK / 1000000) & 255; \
+	TC4H   = (IR_SYSCLOCK * IR_USECPERTICK / 1000000) >> 8; \
+	OCR4C  = (IR_SYSCLOCK * IR_USECPERTICK / 1000000) & 255; \
 	TC4H   = 0; \
 	TCNT4  = 0; \
 })
 
 //-----------------
 #if defined(CORE_OC4A_PIN)
-#	define TIMER_PWM_PIN  CORE_OC4A_PIN  // Teensy
+#	define IR_TIMER_PWM_PIN  CORE_OC4A_PIN  // Teensy
 #elif defined(__AVR_ATmega32U4__)
-#	define TIMER_PWM_PIN  13             // Leonardo
+#	define IR_TIMER_PWM_PIN  13             // Leonardo
 #else
 #	error "Please add OC4A pin number here\n"
 #endif
@@ -273,12 +275,12 @@
 //
 #elif defined(IR_USE_TIMER4)
 
-#define TIMER_RESET
-#define TIMER_ENABLE_PWM    (TCCR4A |= _BV(COM4A1))
-#define TIMER_DISABLE_PWM   (TCCR4A &= ~(_BV(COM4A1)))
-#define TIMER_ENABLE_INTR   (TIMSK4 = _BV(OCIE4A))
-#define TIMER_DISABLE_INTR  (TIMSK4 = 0)
-#define TIMER_INTR_NAME     TIMER4_COMPA_vect
+#define IR_TIMER_RESET
+#define IR_TIMER_ENABLE_PWM    (TCCR4A |= _BV(COM4A1))
+#define IR_TIMER_DISABLE_PWM   (TCCR4A &= ~(_BV(COM4A1)))
+#define IR_TIMER_ENABLE_INTR   (TIMSK4 = _BV(OCIE4A))
+#define IR_TIMER_DISABLE_INTR  (TIMSK4 = 0)
+#define IR_TIMER_INTR_NAME     TIMER4_COMPA_vect
 
 #define TIMER_CONFIG_KHZ(val) ({ \
   const uint16_t pwmval = SYSCLOCK / 2000 / (val); \
@@ -477,4 +479,4 @@
 #endif
 #endif
 
-#endif
+#endifs
