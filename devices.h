@@ -282,26 +282,26 @@
 #define IR_TIMER_DISABLE_INTR  (TIMSK4 = 0)
 #define IR_TIMER_INTR_NAME     TIMER4_COMPA_vect
 
-#define TIMER_CONFIG_KHZ(val) ({ \
-  const uint16_t pwmval = SYSCLOCK / 2000 / (val); \
+#define IR_TIMER_CONFIG_KHZ(val) ({ \
+  const uint16_t pwmval = IR_SYSCLOCK / 2000 / (val); \
   TCCR4A = _BV(WGM41); \
   TCCR4B = _BV(WGM43) | _BV(CS40); \
   ICR4 = pwmval; \
   OCR4A = pwmval / 3; \
 })
 
-#define TIMER_CONFIG_NORMAL() ({ \
+#define IR_TIMER_CONFIG_NORMAL() ({ \
   TCCR4A = 0; \
   TCCR4B = _BV(WGM42) | _BV(CS40); \
-  OCR4A = SYSCLOCK * USECPERTICK / 1000000; \
+  OCR4A = IR_SYSCLOCK * IR_USECPERTICK / 1000000; \
   TCNT4 = 0; \
 })
 
 //-----------------
 #if defined(CORE_OC4A_PIN)
-#	define TIMER_PWM_PIN  CORE_OC4A_PIN
+#	define IR_TIMER_PWM_PIN  CORE_OC4A_PIN
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#	define TIMER_PWM_PIN  6  // Arduino Mega
+#	define IR_TIMER_PWM_PIN  6  // Arduino Mega
 #else
 #	error "Please add OC4A pin number here\n"
 #endif
@@ -311,33 +311,33 @@
 //
 #elif defined(IR_USE_TIMER5)
 
-#define TIMER_RESET
-#define TIMER_ENABLE_PWM    (TCCR5A |= _BV(COM5A1))
-#define TIMER_DISABLE_PWM   (TCCR5A &= ~(_BV(COM5A1)))
-#define TIMER_ENABLE_INTR   (TIMSK5 = _BV(OCIE5A))
-#define TIMER_DISABLE_INTR  (TIMSK5 = 0)
-#define TIMER_INTR_NAME     TIMER5_COMPA_vect
+#define IR_TIMER_RESET
+#define IR_TIMER_ENABLE_PWM    (TCCR5A |= _BV(COM5A1))
+#define IR_TIMER_DISABLE_PWM   (TCCR5A &= ~(_BV(COM5A1)))
+#define IR_TIMER_ENABLE_INTR   (TIMSK5 = _BV(OCIE5A))
+#define IR_TIMER_DISABLE_INTR  (TIMSK5 = 0)
+#define IR_TIMER_INTR_NAME     TIMER5_COMPA_vect
 
-#define TIMER_CONFIG_KHZ(val) ({ \
-  const uint16_t pwmval = SYSCLOCK / 2000 / (val); \
+#define IR_TIMER_CONFIG_KHZ(val) ({ \
+  const uint16_t pwmval = IR_SYSCLOCK / 2000 / (val); \
   TCCR5A = _BV(WGM51); \
   TCCR5B = _BV(WGM53) | _BV(CS50); \
   ICR5 = pwmval; \
   OCR5A = pwmval / 3; \
 })
 
-#define TIMER_CONFIG_NORMAL() ({ \
+#define IR_TIMER_CONFIG_NORMAL() ({ \
   TCCR5A = 0; \
   TCCR5B = _BV(WGM52) | _BV(CS50); \
-  OCR5A = SYSCLOCK * USECPERTICK / 1000000; \
+  OCR5A = IR_SYSCLOCK * IR_USECPERTICK / 1000000; \
   TCNT5 = 0; \
 })
 
 //-----------------
 #if defined(CORE_OC5A_PIN)
-#	define TIMER_PWM_PIN  CORE_OC5A_PIN
+#	define IR_TIMER_PWM_PIN  CORE_OC5A_PIN
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#	define TIMER_PWM_PIN  46  // Arduino Mega
+#	define IR_TIMER_PWM_PIN  46  // Arduino Mega
 #else
 #	error "Please add OC5A pin number here\n"
 #endif
@@ -347,38 +347,38 @@
 //
 #elif defined(IR_USE_TIMER_CMT)
 
-#define TIMER_RESET ({     \
+#define IR_TIMER_RESET ({     \
 	uint8_t tmp = CMT_MSC; \
 	CMT_CMD2 = 30;         \
 })
 
-#define TIMER_ENABLE_PWM  do {                                         \
+#define IR_TIMER_ENABLE_PWM  do {                                         \
 	CORE_PIN5_CONFIG = PORT_PCR_MUX(2) | PORT_PCR_DSE | PORT_PCR_SRE;  \
 } while(0)
 
-#define TIMER_DISABLE_PWM  do {                                        \
+#define IR_TIMER_DISABLE_PWM  do {                                        \
 	CORE_PIN5_CONFIG = PORT_PCR_MUX(1) | PORT_PCR_DSE | PORT_PCR_SRE;  \
 } while(0)
 
-#define TIMER_ENABLE_INTR   NVIC_ENABLE_IRQ(IRQ_CMT)
-#define TIMER_DISABLE_INTR  NVIC_DISABLE_IRQ(IRQ_CMT)
-#define TIMER_INTR_NAME     cmt_isr
+#define IR_TIMER_ENABLE_INTR   NVIC_ENABLE_IRQ(IRQ_CMT)
+#define IR_TIMER_DISABLE_INTR  NVIC_DISABLE_IRQ(IRQ_CMT)
+#define IR_TIMER_INTR_NAME     cmt_isr
 
 //-----------------
-#ifdef ISR
-#	undef ISR
+#ifdef IR_ISR
+#	undef IR_ISR
 #endif
-#define  ISR(f)  void f(void)
+#define  IR_ISR(f)  void f(void)
 
 //-----------------
 #if (F_BUS == 48000000)
-#	define CMT_PPS_VAL  5
+#	define IR_CMT_PPS_VAL  5
 #else
-#	define CMT_PPS_VAL  2
+#	define IR_CMT_PPS_VAL  2
 #endif
 
 //-----------------
-#define TIMER_CONFIG_KHZ(val) ({ 	 \
+#define IR_TIMER_CONFIG_KHZ(val) ({ 	 \
 	SIM_SCGC4 |= SIM_SCGC4_CMT;      \
 	SIM_SOPT2 |= SIM_SOPT2_PTD7PAD;  \
 	CMT_PPS    = CMT_PPS_VAL;        \
@@ -392,7 +392,7 @@
 	CMT_MSC    = 0x01;               \
 })
 
-#define TIMER_CONFIG_NORMAL() ({  \
+#define IR_TIMER_CONFIG_NORMAL() ({  \
 	SIM_SCGC4 |= SIM_SCGC4_CMT;   \
 	CMT_PPS    = CMT_PPS_VAL;     \
 	CMT_CGH1   = 1;               \
@@ -405,21 +405,21 @@
 	CMT_MSC    = 0x03;            \
 })
 
-#define TIMER_PWM_PIN  5
+#define IR_TIMER_PWM_PIN  5
 
 // defines for TPM1 timer on Teensy-LC
 #elif defined(IR_USE_TIMER_TPM1)
-#define TIMER_RESET          FTM1_SC |= FTM_SC_TOF;
-#define TIMER_ENABLE_PWM     CORE_PIN16_CONFIG = PORT_PCR_MUX(3)|PORT_PCR_DSE|PORT_PCR_SRE
-#define TIMER_DISABLE_PWM    CORE_PIN16_CONFIG = PORT_PCR_MUX(1)|PORT_PCR_SRE
-#define TIMER_ENABLE_INTR    NVIC_ENABLE_IRQ(IRQ_FTM1)
-#define TIMER_DISABLE_INTR   NVIC_DISABLE_IRQ(IRQ_FTM1)
-#define TIMER_INTR_NAME      ftm1_isr
-#ifdef ISR
-#undef ISR
+#define IR_TIMER_RESET          FTM1_SC |= FTM_SC_TOF;
+#define IR_TIMER_ENABLE_PWM     CORE_PIN16_CONFIG = PORT_PCR_MUX(3)|PORT_PCR_DSE|PORT_PCR_SRE
+#define IR_TIMER_DISABLE_PWM    CORE_PIN16_CONFIG = PORT_PCR_MUX(1)|PORT_PCR_SRE
+#define IR_TIMER_ENABLE_INTR    NVIC_ENABLE_IRQ(IRQ_FTM1)
+#define IR_TIMER_DISABLE_INTR   NVIC_DISABLE_IRQ(IRQ_FTM1)
+#define IR_TIMER_INTR_NAME      ftm1_isr
+#ifdef IR_ISR
+#undef IR_ISR
 #endif
-#define ISR(f) void f(void)
-#define TIMER_CONFIG_KHZ(val) ({                     \
+#define IR_ISR(f) void f(void)
+#define IR_TIMER_CONFIG_KHZ(val) ({                     \
 	SIM_SCGC6 |= SIM_SCGC6_TPM1;                 \
 	FTM1_SC = 0;                                 \
 	FTM1_CNT = 0;                                \
@@ -427,7 +427,8 @@
 	FTM1_C0V = (F_PLL/6000) / val - 1;           \
 	FTM1_SC = FTM_SC_CLKS(1) | FTM_SC_PS(0);     \
 })
-#define TIMER_CONFIG_NORMAL() ({                     \
+
+#define IR_TIMER_CONFIG_NORMAL() ({                     \
 	SIM_SCGC6 |= SIM_SCGC6_TPM1;                 \
 	FTM1_SC = 0;                                 \
 	FTM1_CNT = 0;                                \
@@ -435,41 +436,41 @@
 	FTM1_C0V = 0;                                \
 	FTM1_SC = FTM_SC_CLKS(1) | FTM_SC_PS(0) | FTM_SC_TOF | FTM_SC_TOIE; \
 })
-#define TIMER_PWM_PIN        16
+#define IR_TIMER_PWM_PIN        16
 
 // defines for timer_tiny0 (8 bits)
 #elif defined(IR_USE_TIMER_TINY0)
-#define TIMER_RESET
-#define TIMER_ENABLE_PWM     (TCCR0A |= _BV(COM0B1))
-#define TIMER_DISABLE_PWM    (TCCR0A &= ~(_BV(COM0B1)))
-#define TIMER_ENABLE_INTR    (TIMSK |= _BV(OCIE0A))
-#define TIMER_DISABLE_INTR   (TIMSK &= ~(_BV(OCIE0A)))
-#define TIMER_INTR_NAME      TIMER0_COMPA_vect
-#define TIMER_CONFIG_KHZ(val) ({ \
-  const uint8_t pwmval = SYSCLOCK / 2000 / (val); \
+#define IR_TIMER_RESET
+#define IR_TIMER_ENABLE_PWM     (TCCR0A |= _BV(COM0B1))
+#define IR_TIMER_DISABLE_PWM    (TCCR0A &= ~(_BV(COM0B1)))
+#define IR_TIMER_ENABLE_INTR    (TIMSK |= _BV(OCIE0A))
+#define IR_TIMER_DISABLE_INTR   (TIMSK &= ~(_BV(OCIE0A)))
+#define IR_TIMER_INTR_NAME      TIMER0_COMPA_vect
+#define IR_TIMER_CONFIG_KHZ(val) ({ \
+  const uint8_t pwmval = IR_SYSCLOCK / 2000 / (val); \
   TCCR0A = _BV(WGM00); \
   TCCR0B = _BV(WGM02) | _BV(CS00); \
   OCR0A = pwmval; \
   OCR0B = pwmval / 3; \
 })
-#define TIMER_COUNT_TOP      (SYSCLOCK * USECPERTICK / 1000000)
-#if (TIMER_COUNT_TOP < 256)
-#define TIMER_CONFIG_NORMAL() ({ \
+#define IR_TIMER_COUNT_TOP      (IR_SYSCLOCK * IR_USECPERTICK / 1000000)
+#if (IR_TIMER_COUNT_TOP < 256)
+#define IR_TIMER_CONFIG_NORMAL() ({ \
   TCCR0A = _BV(WGM01); \
   TCCR0B = _BV(CS00); \
-  OCR0A = TIMER_COUNT_TOP; \
+  OCR0A = IR_TIMER_COUNT_TOP; \
   TCNT0 = 0; \
 })
 #else
-#define TIMER_CONFIG_NORMAL() ({ \
+#define IR_TIMER_CONFIG_NORMAL() ({ \
   TCCR0A = _BV(WGM01); \
   TCCR0B = _BV(CS01); \
-  OCR0A = TIMER_COUNT_TOP / 8; \
+  OCR0A = IR_TIMER_COUNT_TOP / 8; \
   TCNT0 = 0; \
 })
 #endif
 
-#define TIMER_PWM_PIN        1  /* ATtiny85 */
+#define IR_TIMER_PWM_PIN        1  /* ATtiny85 */
 
 //---------------------------------------------------------
 // Unknown Timer
