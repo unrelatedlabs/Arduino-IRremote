@@ -30,22 +30,18 @@
 // switch IRremote to use a different timer.
 //
 
+#ifndef IR_DEVICES_H
+#define IR_DEVICES_H
+
+#if IR_SEND
+
 // Arduino Mega
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-	#define IR_USE_TIMER1   // tx = pin 11
+	// #define IR_USE_TIMER1   // tx = pin 11
 	#define IR_USE_TIMER2   // tx = pin 9
-	#define IR_USE_TIMER3   // tx = pin 5
-	#define IR_USE_TIMER4   // tx = pin 6
-	#define IR_USE_TIMER5   // tx = pin 46
-
-// TODO: Manage multi sends
-	// #define IR_SEND_PIN_1 11
-	// #define IR_SEND_PIN_2 9
-	// #define IR_SEND_PIN_3 5
-	// #define IR_SEND_PIN_4 6
-	// #define IR_SEND_PIN_5 IR_USE_TIMER5
-	
-	// #define IR_SEND_PINS 5
+	// #define IR_USE_TIMER3   // tx = pin 5
+	// #define IR_USE_TIMER4   // tx = pin 6
+	// #define IR_USE_TIMER5   // tx = pin 46
 
 // Teensy 1.0
 #elif defined(__AVR_AT90USB162__)
@@ -539,4 +535,5 @@
 #endif
 #endif
 
-#endifs
+#endif
+#endif

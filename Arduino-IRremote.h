@@ -34,7 +34,7 @@
 /* #endif */
 
 //======================================================================================
-// DEBUG
+// Configuration
 //======================================================================================
 // Here are the debug defines
 // #define IR_GLOBAL            //  Allows for sharing of extern variables
@@ -43,7 +43,15 @@
 //                                  is only truly external if IR_GLOBAL is
 //                                  defined
 // #define IR_BLINKLED          //  Enables blinking of IR_BLINKLED_PIN when ...
+// #define IR_SEND				//  Enables send function of this library
+// #define IR_DEBUG 			// 	Enables all debugging
 
+
+#ifdef IR_DEBUG
+	#define IR_BLINKLED
+#endif
+
+#endif
 //=======================================================================================
 // GLOBAL VARIABLES
 //=======================================================================================
@@ -87,29 +95,7 @@ irparams_t;
 // Therefore we declare it as "volatile" to stop the compiler/CPU caching it
 EXTERN volatile irparams_t  irparams;
 
-//=======================================================================================
-// Blinking LED defines
-//=======================================================================================
 
-#ifdef IR_BLINKLED
-// TODO: Add TEENSY 2, 3
-// TODO: Create Table
-    #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-        #define IR_BLINKLED_PIN    13
-        #define IR_BLINKLED_ON()   (PORTB |= B10000000)
-        #define IR_BLINKLED_OFF()  (PORTB &= B01111111)
-
-    #elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
-        #define IR_BLINKLED_PIN    0
-        #define IR_BLINKLED_ON()   (PORTD |= B00000001)
-        #define IR_BLINKLED_OFF()  (PORTD &= B11111110)
-
-    #else
-        #define IR_BLINKLED_PIN    13
-	    #define IR_BLINKLED_ON()   (PORTB |= B00100000)
-        #define IR_BLINKLED_OFF()  (PORTB &= B11011111)
-    #endif
-#endif
 
 //=======================================================================================
 // CPU Frequency
