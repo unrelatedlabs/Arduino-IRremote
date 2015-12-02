@@ -32,11 +32,20 @@
 
 // Arduino Mega
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-	//#define IR_USE_TIMER1   // tx = pin 11
-	#define IR_USE_TIMER2     // tx = pin 9
-	//#define IR_USE_TIMER3   // tx = pin 5
-	//#define IR_USE_TIMER4   // tx = pin 6
-	//#define IR_USE_TIMER5   // tx = pin 46
+	#define IR_USE_TIMER1   // tx = pin 11
+	#define IR_USE_TIMER2   // tx = pin 9
+	#define IR_USE_TIMER3   // tx = pin 5
+	#define IR_USE_TIMER4   // tx = pin 6
+	#define IR_USE_TIMER5   // tx = pin 46
+
+// TODO: Manage multi sends
+	// #define IR_SEND_PIN_1 11
+	// #define IR_SEND_PIN_2 9
+	// #define IR_SEND_PIN_3 5
+	// #define IR_SEND_PIN_4 6
+	// #define IR_SEND_PIN_5 IR_USE_TIMER5
+	
+	// #define IR_SEND_PINS 5
 
 // Teensy 1.0
 #elif defined(__AVR_AT90USB162__)
@@ -84,6 +93,56 @@
 	//#define IR_USE_TIMER1   // tx = pin 9
 	#define IR_USE_TIMER2     // tx = pin 3
 
+#endif
+
+//=======================================================================================
+// Blinking LED defines
+//=======================================================================================
+// Uses Built-in LED.
+
+#ifdef IR_BLINKLED
+// TODO: Create Table
+// Add Teensy 1.0
+
+	// Teensy 1.0
+	#if defined(__AVR_AT90USB162__)
+		// TODO
+
+	// Teensy 2.0 and 2.0++
+	#elif defined(__AVR_ATmega32U4__)
+	#define IR_BLINKLED_ON() 	(PORTD |= B00100000)
+	#define IR_BLINKLED_OFF() 	(PORTD &= B11011111)
+	
+
+	// Teensy 3.0 / Teensy 3.1
+	#elif defined(__MK20DX128__) || defined(__MK20DX256__)
+	#define IR_BLINKLED_ON()	(GPIOC_PDOR |= B00010000)
+	#define IR_BLINKLED_OFF() 	(GPIOC_PDOR &= B11101111)
+	
+
+	// Teensy-LC
+	#elif defined(__MKL26Z64__)
+	#define IR_BLINKLED_ON() 	(FGPIOC_PDOR |= B00010000)
+	#define IR_BLINKLED_OFF() 	(FGPIOC_PDOR &= B11101111)
+	 
+	// Arduino Mega
+    #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+        #define IR_BLINKLED_PIN    13
+        #define IR_BLINKLED_ON()   (PORTB |= B10000000)
+        #define IR_BLINKLED_OFF()  (PORTB &= B01111111)
+
+	// Sanguino
+    #elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
+        #define IR_BLINKLED_PIN    0
+        #define IR_BLINKLED_ON()   (PORTD |= B00000001)
+        #define IR_BLINKLED_OFF()  (PORTD &= B11111110)
+	
+	// Other... Uno etc.
+    #else
+        #define IR_BLINKLED_PIN    13
+	    #define IR_BLINKLED_ON()   (PORTB |= B00100000)
+        #define IR_BLINKLED_OFF()  (PORTB &= B11011111)
+    #endif
 #endif
 
 //=======================================================================================
