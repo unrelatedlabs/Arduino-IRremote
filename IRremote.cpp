@@ -18,13 +18,16 @@
 // Whynter A/C ARC-110WD added by Francesco Meschia
 //******************************************************************************
 
-#include <avr/interrupt.h>
+
 
 // Defining IR_GLOBAL here allows us to declare the instantiation of global variables
 #define IR_GLOBAL
 #	include "IRremote.h"
 #	include "IRremoteInt.h"
 #undef IR_GLOBAL
+
+#ifdef NOTESP8266
+
 
 //+=============================================================================
 // The match functions were (apparently) originally MACROs to improve code speed
@@ -107,6 +110,7 @@ int  MATCH_SPACE (int measured_ticks,  int desired_us)
     DBG_PRINTLN(F("?; FAILED")); 
  	return passed;
 }
+
 
 //+=============================================================================
 // Interrupt Service Routine - Fires every 50uS
@@ -191,3 +195,5 @@ ISR (TIMER_INTR_NAME)
 				else BLINKLED_OFF() ;   // if no user defined LED pin, turn default LED pin for the hardware on
 	}
 }
+#endif
+

@@ -1,6 +1,8 @@
 #include "IRremote.h"
 #include "IRremoteInt.h"
 
+#ifdef NOT_ESP8266
+
 //+=============================================================================
 // Decodes the received IR message
 // Returns 0 if no data ready, 1 if data ready.
@@ -211,3 +213,5 @@ long  IRrecv::decodeHash (decode_results *results)
 
 	return true;
 }
+
+#endif

@@ -5,8 +5,8 @@
   "repository":
   {
     "type": "git",
-    "url": "https://github.com/shirriff/Arduino-IRremote.git"
+    "url": "https://github.com/unrelatedlabs/Arduino-IRremote.git"
   },
   "frameworks": "arduino",
-  "platforms": "atmelavr"
+  "platforms": "esp8266"
 }

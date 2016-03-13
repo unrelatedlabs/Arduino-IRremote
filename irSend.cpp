@@ -1,6 +1,9 @@
 #include "IRremote.h"
 #include "IRremoteInt.h"
 
+static uint32_t _irFrequency = 38000;
+static uint32_t _1bitus = 1000000/_irFrequency;
+
 //+=============================================================================
 void  IRsend::sendRaw (const unsigned int buf[],  unsigned int len,  unsigned int hz)
 {
@@ -21,8 +24,17 @@ void  IRsend::sendRaw (const unsigned int buf[],  unsigned int len,  unsigned in
 //
 void  IRsend::mark (unsigned int time)
 {
-	TIMER_ENABLE_PWM; // Enable pin 3 PWM output
-	if (time > 0) custom_delay_usec(time);
+	uint32_t highus = _1bitus/2 * 77;
+	uint32_t lowus = _1bitus/2 * 77;
+
+	int cnt = time / _1bitus;
+
+	for( int i = 0; i < cnt; i++){
+		digitalWrite(TIMER_PWM_PIN, HIGH);
+		custom_delay_usec(highus);
+		digitalWrite(TIMER_PWM_PIN, LOW);
+		custom_delay_usec(lowus);	
+	}
 }
 
 //+=============================================================================
@@ -32,8 +44,17 @@ void  IRsend::mark (unsigned int time)
 //
 void  IRsend::space (unsigned int time)
 {
-	TIMER_DISABLE_PWM; // Disable pin 3 PWM output
-	if (time > 0) IRsend::custom_delay_usec(time);
+	uint32_t highus = _1bitus/2 * 77;
+	uint32_t lowus = _1bitus/2 * 77;
+
+	int cnt = time / _1bitus;
+
+	for( int i = 0; i < cnt; i++){
+		digitalWrite(TIMER_PWM_PIN, LOW);
+		custom_delay_usec(highus);
+		digitalWrite(TIMER_PWM_PIN, LOW);
+		custom_delay_usec(lowus);	
+	}
 }
 
 
@@ -54,8 +75,11 @@ void  IRsend::space (unsigned int time)
 //
 void  IRsend::enableIROut (int khz)
 {
+	_irFrequency = khz * 1000;
+	_1bitus = 1000000/_irFrequency;
+
 	// Disable the Timer2 Interrupt (which is used for receiving IR)
-	TIMER_DISABLE_INTR; //Timer2 Overflow Interrupt
+	//TIMER_DISABLE_INTR; //Timer2 Overflow Interrupt
 
 	pinMode(TIMER_PWM_PIN, OUTPUT);
 	digitalWrite(TIMER_PWM_PIN, LOW); // When not sending PWM, we want it low
@@ -65,7 +89,7 @@ void  IRsend::enableIROut (int khz)
 	// WGM2 = 101: phase-correct PWM with OCRA as top
 	// CS2  = 000: no prescaling
 	// The top value for the timer.  The modulation frequency will be SYSCLOCK / 2 / OCR2A.
-	TIMER_CONFIG_KHZ(khz);
+	//TIMER_CONFIG_KHZ(khz);
 }
 
 //+=============================================================================
@@ -73,12 +97,12 @@ void  IRsend::enableIROut (int khz)
 
 void IRsend::custom_delay_usec(unsigned long uSecs) {
   if (uSecs > 4) {
-    unsigned long start = micros();
+    unsigned long start = ESP.getCycleCount();
     unsigned long endMicros = start + uSecs - 4;
     if (endMicros < start) { // Check if overflow
-      while ( micros() > start ) {} // wait until overflow
+      while ( ESP.getCycleCount() > start ) {} // wait until overflow
     }
-    while ( micros() < endMicros ) {} // normal wait
+    while ( ESP.getCycleCount() < endMicros ) {} // normal wait
   } 
   //else {
   //  __asm__("nop\n\t"); // must have or compiler optimizes out
